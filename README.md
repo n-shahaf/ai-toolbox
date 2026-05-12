@@ -16,6 +16,7 @@ agents/                       # Specialist agents — one role per file
   Documenter.agent.md         # Updates README, CHANGELOG, docstrings to match code
 
 skills/                       # Reusable knowledge agents reference by path
+  token-discipline/SKILL.md   # Mandatory for every agent: token budget rules + operator check-in protocol
   code-quality/SKILL.md       # SOLID, patterns, code smells, review heuristics
   debugging/SKILL.md          # Reproduction, hypothesis testing, root-cause analysis
   documentation/SKILL.md      # Voice, structure, what belongs where
@@ -43,6 +44,7 @@ The full routing matrix and execution model live in `agents/Orchestrator.agent.m
 
 - **Agents** are roles. Each file defines responsibilities, tools, workflow, output format, and explicit "do not do" rules. Only Developer, Developer-Lite, and Documenter modify files; the rest produce reports.
 - **Cost tiering.** Developer and Developer-Lite share the same role but run on different models. The Orchestrator routes simple, single-file, low-risk edits to Developer-Lite (cheaper) and reserves Developer for multi-file, design, or security-sensitive work. See Orchestrator → "Developer vs. Developer-Lite" for the exact criteria.
+- **Token discipline.** Every agent references `skills/token-discipline/SKILL.md` and has a "Cost Gates" section. Before any costly operation (web fetch, multi-file read, full test/build, repeated searches), an agent issues an `[OPERATOR CHECK]` and pauses — letting the human short-circuit work the agent would otherwise spend tokens on. Developer-Lite is strictest: instead of gating, it escalates to Developer.
 - **Skills** are shared knowledge. Agents reference them by relative path (e.g. `../skills/code-quality/SKILL.md`). A skill is loaded only when the agent's task falls within its domain.
 
 This split keeps each agent file focused on *how it operates* and lets multiple agents share the same standards without duplication.
