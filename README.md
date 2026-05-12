@@ -9,7 +9,8 @@ agents/                       # Specialist agents — one role per file
   Orchestrator.agent.md       # Master agent: classifies requests, delegates, schedules phases
   Planner.agent.md            # Produces file-scoped, ordered implementation plans
   Researcher.agent.md         # Surveys approaches and recommends one (no code)
-  Developer.agent.md          # Implements features, refactors, applies fixes
+  Developer.agent.md          # Implements non-trivial work — multi-file, public APIs, security-sensitive
+  Developer-Lite.agent.md     # Cheaper sibling for single-file, low-risk edits; escalates when scope grows
   Debugger.agent.md           # Reproduces defects, isolates root cause, proposes minimal fix
   Reviewer.agent.md           # QA: reviews diffs for bugs, security, performance, quality
   Documenter.agent.md         # Updates README, CHANGELOG, docstrings to match code
@@ -29,8 +30,9 @@ The Orchestrator is the master agent. It classifies the incoming request and rou
 |---|---|
 | New feature (well-understood) | Planner → Developer → Reviewer → Documenter |
 | New feature (novel / unknown stack) | Researcher → Planner → Developer → Reviewer → Documenter |
-| Bug / crash / regression | Debugger → Developer → Reviewer → Documenter |
+| Bug / crash / regression | Debugger → Developer (or Developer-Lite for a 1–2 line fix) → Reviewer → Documenter |
 | Refactor | Planner → Developer → Reviewer |
+| Tiny, single-file edit (typo, rename, constant, guard) | Developer-Lite → Reviewer |
 | Open-ended technical question | Researcher (stop) |
 | Pre-merge gate | Reviewer (+ `security-scan` skill if security-sensitive) |
 | Docs-only update | Documenter → Reviewer |
@@ -39,7 +41,8 @@ The full routing matrix and execution model live in `agents/Orchestrator.agent.m
 
 ## How agents and skills work together
 
-- **Agents** are roles. Each file defines responsibilities, tools, workflow, output format, and explicit "do not do" rules. Only the Developer and Documenter modify files; the rest produce reports.
+- **Agents** are roles. Each file defines responsibilities, tools, workflow, output format, and explicit "do not do" rules. Only Developer, Developer-Lite, and Documenter modify files; the rest produce reports.
+- **Cost tiering.** Developer and Developer-Lite share the same role but run on different models. The Orchestrator routes simple, single-file, low-risk edits to Developer-Lite (cheaper) and reserves Developer for multi-file, design, or security-sensitive work. See Orchestrator → "Developer vs. Developer-Lite" for the exact criteria.
 - **Skills** are shared knowledge. Agents reference them by relative path (e.g. `../skills/code-quality/SKILL.md`). A skill is loaded only when the agent's task falls within its domain.
 
 This split keeps each agent file focused on *how it operates* and lets multiple agents share the same standards without duplication.

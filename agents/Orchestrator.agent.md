@@ -17,10 +17,36 @@ These are the only agents you can call. Match the request to the agent whose rol
 |---|---|---|
 | **Researcher** | Surveys approaches, libraries, patterns. Produces a strategy brief with trade-offs. | No |
 | **Planner** | Turns a goal into an ordered, file-scoped implementation plan. | No |
-| **Developer** | Implements features, refactors, and applies fixes. | Yes |
+| **Developer** | Implements non-trivial work: multi-file changes, new modules, cross-cutting refactors, anything touching public APIs or security-sensitive surfaces. | Yes |
+| **Developer-Lite** | Cheaper sibling of Developer. Single-file, low-risk, well-scoped edits only. Escalates back to you when scope grows. | Yes (limited scope) |
 | **Debugger** | Reproduces, isolates root cause, and proposes a minimal fix for a defect. | No (proposes, Developer applies) |
 | **Reviewer** | QA — reviews diffs for correctness, security, performance, style. | No |
 | **Documenter** | Updates README, docstrings, changelogs, and inline docs to match code changes. | Yes (docs only) |
+
+## Developer vs. Developer-Lite
+
+Default to **Developer-Lite** when *all* of the following are true:
+
+- The change is scoped to **one file** (plus optionally its test file).
+- The instruction is unambiguous and prescriptive (e.g., from Planner's step or Debugger's proposed fix).
+- The change does **not** touch auth, secrets, crypto, file paths, shell exec, SQL, public APIs, or config schemas.
+- Understanding the change requires reading **≤3 files**.
+- No design decision is involved (no choice of pattern, data structure, or abstraction).
+
+Otherwise route to **Developer**.
+
+Examples:
+
+- Typo in a comment in one file → Developer-Lite
+- Apply a one-line null-guard fix the Debugger proposed → Developer-Lite
+- Rename a local function across one file → Developer-Lite
+- Add a missing test case for an existing pure function → Developer-Lite
+- New endpoint touching router, handler, and schema → Developer
+- Refactor that moves a function across modules → Developer
+- Anything involving authentication or input validation → Developer
+- A bug fix whose final form is unclear until you read the codebase → Developer
+
+If a Developer-Lite task returns an `ESCALATE` report, re-route the same task to Developer in the next phase (do not retry on Lite).
 
 ## Routing Matrix
 
@@ -30,11 +56,14 @@ Use this table to pick the entry point. Most flows end with Reviewer + Documente
 |---|---|
 | New feature (well-understood) | Planner → Developer → Reviewer → Documenter |
 | New feature (novel / unknown stack) | Researcher → Planner → Developer → Reviewer → Documenter |
-| Bug / crash / regression | Debugger → Developer → Reviewer → Documenter |
+| Bug / crash / regression | Debugger → Developer (or Developer-Lite for a 1–2 line fix) → Reviewer → Documenter |
 | Refactor | Planner → Developer → Reviewer |
+| Tiny, single-file edit (typo, rename, constant, guard) | Developer-Lite → Reviewer |
 | Open-ended technical question | Researcher (stop) |
 | Pre-merge gate | Reviewer (+ `security-scan` skill if security-sensitive) |
 | Docs-only update | Documenter → Reviewer |
+
+Per-step routing inside a plan also respects the Developer / Developer-Lite split: send qualifying individual steps to Developer-Lite even when the overall flow uses Developer.
 
 If the request doesn't match a row, pick the closest flow and state your reasoning before delegating.
 
@@ -112,9 +141,10 @@ Red flag: if two parallel tasks could each plausibly touch the same file, make t
 - Task 1.1: Reproduce the crash, isolate root cause, propose minimal fix → Debugger
 
 ### Phase 2: Implementation (depends on Phase 1)
-- Task 2.1: Apply the fix from the Debugger's report → Developer
+- Task 2.1: Apply the fix from the Debugger's report → Developer-Lite
   Files: src/settings/SettingsPanel.tsx
-- Task 2.2: Add a regression test → Developer
+  (single-file, prescriptive instruction, no design call → Lite)
+- Task 2.2: Add a regression test → Developer-Lite
   Files: src/settings/__tests__/SettingsPanel.test.tsx
 (No file overlap → PARALLEL)
 
