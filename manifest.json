@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-05-13T20:43:15.118Z",
+  "generatedAt": "2026-05-13T20:50:07.998Z",
   "agents": [
     {
       "name": "Debugger",
@@ -80,7 +80,7 @@
     {
       "name": "PR-Fixer",
       "file": "agents/PR-Fixer.agent.md",
-      "description": "Closes the loop on a pull request. Reads review comments, triages each one, applies the actionable fixes (or escalates the larger ones), and posts replies. Stops short of merging.",
+      "description": "Self-contained agent the operator points at a specific pull request that has open review comments (from peers or AI code reviewers). Reads each comment, triages it, applies the fix, and posts a reply. Manually invoked only — not part of any multi-agent flow. Stops short of merging.",
       "model": "GPT-5.3-Codex (copilot)",
       "tools": [
         "vscode",
