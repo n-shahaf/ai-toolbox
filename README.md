@@ -4,35 +4,46 @@ A reusable set of agents and skills for an LLM-driven dev workflow. Designed for
 
 ## Install
 
+The CLI runs directly from this GitHub repo — no npm publish required. `npx` clones the repo on first use and caches it for subsequent runs.
+
 ```bash
 # install all agents + skills into the current project
-npx @n-shahaf/ai-toolbox init --target claude     # → .claude/agents and .claude/skills
-npx @n-shahaf/ai-toolbox init --target copilot    # → .github/chatmodes and .github/copilot-skills
-npx @n-shahaf/ai-toolbox init --target generic    # → .ai-toolbox/agents and .ai-toolbox/skills
+npx github:n-shahaf/ai-toolbox init --target claude     # → .claude/agents and .claude/skills
+npx github:n-shahaf/ai-toolbox init --target copilot    # → .github/chatmodes and .github/copilot-skills
+npx github:n-shahaf/ai-toolbox init --target generic    # → .ai-toolbox/agents and .ai-toolbox/skills
 
 # pick a subset
-npx @n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Developer --skills token-discipline
+npx github:n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Developer --skills token-discipline
 
 # see what's available
-npx @n-shahaf/ai-toolbox list
+npx github:n-shahaf/ai-toolbox list
+```
+
+Pin to a branch or tag to lock the version you install:
+
+```bash
+npx github:n-shahaf/ai-toolbox#main init --target claude
+npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude   # if a release is tagged
 ```
 
 `init` writes a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` can tell what changed where.
+
+If `npx` keeps an old cached copy, force a re-clone with `npx -y github:n-shahaf/ai-toolbox ...` or clear the cache: `npm cache clean --force`.
 
 ## Update
 
 ```bash
 # show what would change (default is dry-run)
-npx @n-shahaf/ai-toolbox sync
+npx github:n-shahaf/ai-toolbox sync
 
 # apply non-conflicting updates (upstream-changed files; missing files)
-npx @n-shahaf/ai-toolbox sync --write
+npx github:n-shahaf/ai-toolbox sync --write
 
-# pull the absolute latest from GitHub instead of the version bundled with the CLI
-npx @n-shahaf/ai-toolbox sync --remote --write
+# pull the absolute latest from GitHub instead of the version bundled with the npx clone
+npx github:n-shahaf/ai-toolbox sync --remote --write
 
 # overwrite local customizations too (you'll lose those edits)
-npx @n-shahaf/ai-toolbox sync --write --force
+npx github:n-shahaf/ai-toolbox sync --write --force
 ```
 
 The lockfile lets `sync` categorize each file:
