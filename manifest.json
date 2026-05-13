@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-05-13T20:00:30.565Z",
+  "generatedAt": "2026-05-13T20:50:07.998Z",
   "agents": [
     {
       "name": "Debugger",
@@ -78,6 +78,23 @@
       ]
     },
     {
+      "name": "PR-Fixer",
+      "file": "agents/PR-Fixer.agent.md",
+      "description": "Self-contained agent the operator points at a specific pull request that has open review comments (from peers or AI code reviewers). Reads each comment, triages it, applies the fix, and posts a reply. Manually invoked only — not part of any multi-agent flow. Stops short of merging.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "execute",
+        "read",
+        "edit",
+        "search",
+        "web",
+        "agent",
+        "github/*",
+        "todo"
+      ]
+    },
+    {
       "name": "Planner",
       "file": "agents/Planner.agent.md",
       "description": "Produces a file-scoped, ordered implementation plan for a given goal. Reads the codebase, verifies docs, surfaces edge cases, and outputs WHAT to do — never HOW to code it.",
@@ -117,6 +134,21 @@
         "web",
         "agent"
       ]
+    },
+    {
+      "name": "Tester",
+      "file": "agents/Tester.agent.md",
+      "description": "Builds and maintains test suites — unit, integration, and end-to-end. Manually invoked only; not part of the Orchestrator's default routing. Use when you specifically want to add coverage to a module, harden a flaky suite, or expand fixtures.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "execute",
+        "read",
+        "edit",
+        "search",
+        "agent",
+        "todo"
+      ]
     }
   ],
   "skills": [
@@ -136,9 +168,19 @@
       "description": "Writing and updating project documentation — README, CHANGELOG, docstrings, API reference. Covers voice, structure, what belongs where, and when to write nothing. Used primarily by the Documenter agent."
     },
     {
+      "name": "pr-comment-triage",
+      "file": "skills/pr-comment-triage/SKILL.md",
+      "description": "Classifying and responding to pull-request review comments. Covers the comment taxonomy, the actionable-vs-defer rubric, reply conventions, and when to escalate. Used primarily by the PR-Fixer agent."
+    },
+    {
       "name": "security-scan",
       "file": "skills/security-scan/SKILL.md",
       "description": "Perform a repository-wide security scan (codebase scan, not PR diff) and report only medium/high/critical vulnerabilities with concrete exploit paths and code evidence. Use when the user asks for a security review, security audit, threat review, SAST-style scan, or types the /security-scan command."
+    },
+    {
+      "name": "testing",
+      "file": "skills/testing/SKILL.md",
+      "description": "Building and maintaining test suites — unit, integration, end-to-end. Covers the test pyramid, behavior-vs-implementation, determinism, mocking discipline, and anti-patterns. Reference when writing new tests, extending coverage, or hardening flaky suites. Used primarily by the Tester agent; referenced by Developer when shipping a regression test alongside a fix."
     },
     {
       "name": "token-discipline",

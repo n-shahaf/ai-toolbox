@@ -42,6 +42,13 @@ These are the only agents you can call. Match the request to the agent whose rol
 | **Reviewer** | QA — reviews diffs for correctness, security, performance, style. | No |
 | **Documenter** | Updates README, docstrings, changelogs, and inline docs to match code changes. | Yes (docs only) |
 
+**Not in your roster (manually invoked only):**
+
+- `Tester` — building or maintaining test suites. Costly. Test work tied to a feature flow stays with Developer / Developer-Lite (regression tests, "the fix comes with its test"); operator invokes Tester directly for dedicated test passes.
+- `PR-Fixer` — addressing peer / AI-reviewer comments on a specific pull request. Self-contained flow: operator points it at a PR, it reads the comments and resolves them. Not part of any multi-phase routing.
+
+Do not route to either. If the operator asks for "tests" or "PR comments," answer that those agents are operator-invoked and let them call directly.
+
 ## Developer vs. Developer-Lite
 
 Default to **Developer-Lite** when *all* of the following are true:
