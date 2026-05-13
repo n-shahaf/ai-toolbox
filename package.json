@@ -1,0 +1,38 @@
+{
+  "name": "@n-shahaf/ai-toolbox",
+  "version": "0.1.0",
+  "description": "Multi-agent dev workflow: install reusable AI agents and skills into your project (Claude Code / Copilot / generic).",
+  "type": "module",
+  "bin": {
+    "ai-toolbox": "bin/ai-toolbox.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "agents/",
+    "skills/",
+    "manifest.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build-manifest": "node scripts/build-manifest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-shahaf/ai-toolbox.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "claude-code",
+    "github-copilot",
+    "llm",
+    "workflow"
+  ]
+}

@@ -2,6 +2,52 @@
 
 A reusable set of agents and skills for an LLM-driven dev workflow. Designed for GitHub Copilot, but the agent and skill files are plain Markdown with YAML frontmatter and can be loaded by any tool that understands that format.
 
+## Install
+
+```bash
+# install all agents + skills into the current project
+npx @n-shahaf/ai-toolbox init --target claude     # → .claude/agents and .claude/skills
+npx @n-shahaf/ai-toolbox init --target copilot    # → .github/chatmodes and .github/copilot-skills
+npx @n-shahaf/ai-toolbox init --target generic    # → .ai-toolbox/agents and .ai-toolbox/skills
+
+# pick a subset
+npx @n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Developer --skills token-discipline
+
+# see what's available
+npx @n-shahaf/ai-toolbox list
+```
+
+`init` writes a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` can tell what changed where.
+
+## Update
+
+```bash
+# show what would change (default is dry-run)
+npx @n-shahaf/ai-toolbox sync
+
+# apply non-conflicting updates (upstream-changed files; missing files)
+npx @n-shahaf/ai-toolbox sync --write
+
+# pull the absolute latest from GitHub instead of the version bundled with the CLI
+npx @n-shahaf/ai-toolbox sync --remote --write
+
+# overwrite local customizations too (you'll lose those edits)
+npx @n-shahaf/ai-toolbox sync --write --force
+```
+
+The lockfile lets `sync` categorize each file:
+
+| Status | Meaning | Default action |
+|---|---|---|
+| `unchanged` | source and local match | skip |
+| `new (missing)` | in manifest, not on disk | install with `--write` |
+| `upstream` | source changed, local matches the installed hash | install with `--write` |
+| `local-only` | you customized; source is the same as when you installed | leave alone (`--force` to overwrite) |
+| `conflict` | source AND local both differ from the installed hash | skip (`--force` to overwrite) |
+| `orphan` | in lockfile but no longer in upstream | informational only |
+
+This is the closest thing to "merge upstream into my version" without writing a real three-way merger — most of the time, conflicts will be rare because the toolbox files are reference material the consumer doesn't edit.
+
 ## What's inside
 
 ```
@@ -21,6 +67,11 @@ skills/                       # Reusable knowledge agents reference by path
   debugging/SKILL.md          # Reproduction, hypothesis testing, root-cause analysis
   documentation/SKILL.md      # Voice, structure, what belongs where
   security-scan/SKILL.md      # Repository-wide security scan (medium/high/critical only)
+
+bin/ai-toolbox.js             # CLI entry (npx target)
+lib/                          # CLI implementation (init / sync / list)
+scripts/build-manifest.js     # Regenerates manifest.json from frontmatter
+manifest.json                 # Generated catalog of agents and skills
 ```
 
 ## Workflow overview
