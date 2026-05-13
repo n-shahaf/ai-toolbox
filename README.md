@@ -4,13 +4,7 @@ A reusable set of agents and skills for an LLM-driven dev workflow. Designed for
 
 ## Install
 
-**Note:** this package is not published to the npm registry. Install it directly from this GitHub repository using any of the options below.
-
-Prerequisites: **Node ≥ 18** and **git** on `PATH`.
-
-### Option 1 — npx (recommended)
-
-No install step. `npx` clones the repo into its cache on first use and reuses it after.
+This package is not published to npm — it lives only in this GitHub repo. Use `npx` with the `github:` shortcut to run the CLI directly from the repo:
 
 ```bash
 # install all agents + skills into the current project
@@ -25,69 +19,39 @@ npx github:n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Develo
 npx github:n-shahaf/ai-toolbox list
 ```
 
-### Option 2 — install globally from git
+`npx` clones the repo into its cache the first time you run it and reuses that clone on subsequent calls. No local install step, no npm registry.
 
-For a stable `ai-toolbox` command on your `PATH`:
+**Prerequisites:** Node ≥ 18 and `git` on `PATH` (npm uses `git` under the hood to fetch from `github:` URLs).
 
-```bash
-npm install -g github:n-shahaf/ai-toolbox
-
-ai-toolbox list
-ai-toolbox init --target claude
-ai-toolbox sync --write
-```
-
-Uninstall with `npm uninstall -g @n-shahaf/ai-toolbox`.
-
-### Option 3 — clone the repo and run
-
-For working on the CLI itself, or inspecting the agent/skill files locally:
-
-```bash
-git clone https://github.com/n-shahaf/ai-toolbox.git
-cd ai-toolbox
-node bin/ai-toolbox.js list
-node bin/ai-toolbox.js init --dir ~/path/to/your-project --target claude
-```
-
-### Option 4 — manual copy (no CLI)
-
-If you don't want any tooling, copy the files by hand. You lose the lockfile-based `sync`, but the agent and skill markdown files themselves work the same way.
-
-```bash
-git clone --depth 1 https://github.com/n-shahaf/ai-toolbox.git /tmp/ai-toolbox
-mkdir -p my-project/.claude
-cp -r /tmp/ai-toolbox/agents  my-project/.claude/
-cp -r /tmp/ai-toolbox/skills  my-project/.claude/
-```
-
-To stay in sync later, re-run the same commands or fold the repo in as a git submodule.
-
-### Pinning to a version
-
-Append `#branch`, `#tag`, or `#<sha>` to the git URL to lock the version you install:
+**Pin a version** by appending `#branch`, `#tag`, or `#<sha>` to the URL:
 
 ```bash
 npx github:n-shahaf/ai-toolbox#main init --target claude
-npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude     # if a release is tagged
-npm install -g github:n-shahaf/ai-toolbox#main
+npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude   # if a release is tagged
 ```
 
-### What `init` writes
+**`init` writes** a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` knows what changed where.
 
-Every install method (1–3) writes a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` can tell what changed where.
+**Troubleshooting:** if `npx` keeps an old cached copy after you push an update, force a re-fetch with `npx -y github:n-shahaf/ai-toolbox ...`, or clear the npx cache entirely with `npm cache clean --force`.
 
-### Troubleshooting
+<details>
+<summary>Alternatives if you don't want npx</summary>
 
 ```bash
-# force npx to re-fetch the repo (bypass the cache)
-npx -y github:n-shahaf/ai-toolbox ...
+# Global install (stable `ai-toolbox` command on PATH)
+npm install -g github:n-shahaf/ai-toolbox
+ai-toolbox list
 
-# nuclear option: clear the npx cache entirely
-npm cache clean --force
+# Clone and run (for developing on the CLI itself)
+git clone https://github.com/n-shahaf/ai-toolbox.git
+node ai-toolbox/bin/ai-toolbox.js init --dir ~/my-project --target claude
+
+# Pure copy (no CLI, no lockfile-based sync)
+git clone --depth 1 https://github.com/n-shahaf/ai-toolbox.git /tmp/ai-toolbox
+cp -r /tmp/ai-toolbox/agents /tmp/ai-toolbox/skills my-project/.claude/
 ```
 
-If `git` isn't on `PATH`, `npm` and `npx` will fail to clone the repo. Install git first.
+</details>
 
 ## Update
 
