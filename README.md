@@ -10,6 +10,7 @@ This package is not published to npm — it lives only in this GitHub repo. Use 
 # install all agents + skills into the current project
 npx github:n-shahaf/ai-toolbox init --target claude     # → .claude/agents and .claude/skills
 npx github:n-shahaf/ai-toolbox init --target copilot    # → .github/chatmodes and .github/copilot-skills
+npx github:n-shahaf/ai-toolbox init --target cursor     # → .cursor/rules and .cursor/skills
 npx github:n-shahaf/ai-toolbox init --target generic    # → .ai-toolbox/agents and .ai-toolbox/skills
 
 # pick a subset
@@ -18,6 +19,8 @@ npx github:n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Develo
 # see what's available
 npx github:n-shahaf/ai-toolbox list
 ```
+
+For Cursor, agents land as `.cursor/rules/<name>.mdc` with `alwaysApply: false`, so they're opt-in via `@`-mention rather than injected into every turn.
 
 `npx` clones the repo into its cache the first time you run it and reuses that clone on subsequent calls. No local install step, no npm registry.
 
@@ -93,7 +96,9 @@ agents/                       # Specialist agents — one role per file
   Developer-Lite.agent.md     # Cheaper sibling for single-file, low-risk edits; escalates when scope grows
   Debugger.agent.md           # Reproduces defects, isolates root cause, proposes minimal fix
   Reviewer.agent.md           # QA: reviews diffs for bugs, security, performance, quality
+  PR-Fixer.agent.md           # Triages PR review comments, applies small fixes, escalates the rest
   Documenter.agent.md         # Updates README, CHANGELOG, docstrings to match code
+  Tester.agent.md             # Builds and maintains test suites — MANUALLY INVOKED ONLY
 
 skills/                       # Reusable knowledge agents reference by path
   token-discipline/SKILL.md   # Mandatory for every agent: token budget rules + operator check-in protocol
@@ -101,6 +106,8 @@ skills/                       # Reusable knowledge agents reference by path
   debugging/SKILL.md          # Reproduction, hypothesis testing, root-cause analysis
   documentation/SKILL.md      # Voice, structure, what belongs where
   security-scan/SKILL.md      # Repository-wide security scan (medium/high/critical only)
+  testing/SKILL.md            # Test pyramid, behavior-vs-implementation, determinism, mocking
+  pr-comment-triage/SKILL.md  # Comment taxonomy, actionable-vs-defer rubric, reply conventions
 
 bin/ai-toolbox.js             # CLI entry (npx target)
 lib/                          # CLI implementation (init / sync / list)
@@ -121,7 +128,10 @@ The Orchestrator is the master agent. It classifies the incoming request and rou
 | Tiny, single-file edit (typo, rename, constant, guard) | Developer-Lite → Reviewer |
 | Open-ended technical question | Researcher (stop) |
 | Pre-merge gate | Reviewer (+ `security-scan` skill if security-sensitive) |
+| Address PR review comments | PR-Fixer → Reviewer (large fixes escalate to Developer mid-flow) |
 | Docs-only update | Documenter → Reviewer |
+
+The **Tester** agent is intentionally **not** in the routing matrix — it's manually invoked. Test work that belongs to a feature flow stays with Developer / Developer-Lite (regression tests, "the change comes with its test"). Invoke Tester directly when you want a dedicated test pass: building a suite for a legacy module, hardening flaky tests, expanding coverage on specific behaviors. Tester is the most expensive role in the toolbox (lots of file reads, lots of runner invocations), so the cost is gated behind explicit opt-in.
 
 The full routing matrix and execution model live in `agents/Orchestrator.agent.md`.
 
@@ -160,6 +170,7 @@ You don't have to enter through the Orchestrator. For a focused task, invoke a s
 - *"Run the Reviewer on this PR."*
 - *"Use the Researcher to compare options for X."*
 - *"Have the Debugger diagnose this stack trace."*
+- *"Use the Tester to add coverage to `src/auth/session.ts`."* (Tester is **only** invoked this way.)
 
 The Orchestrator is the right entry point when a request spans multiple specialists or when the right flow isn't obvious.
 
