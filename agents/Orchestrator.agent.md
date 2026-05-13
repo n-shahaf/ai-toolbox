@@ -40,10 +40,14 @@ These are the only agents you can call. Match the request to the agent whose rol
 | **Developer-Lite** | Cheaper sibling of Developer. Single-file, low-risk, well-scoped edits only. Escalates back to you when scope grows. | Yes (limited scope) |
 | **Debugger** | Reproduces, isolates root cause, and proposes a minimal fix for a defect. | No (proposes, Developer applies) |
 | **Reviewer** | QA — reviews diffs for correctness, security, performance, style. | No |
-| **PR-Fixer** | Closes the loop on a PR: triages review comments, applies the small fixes, escalates the big ones, posts replies. Does NOT merge or force-push. | Yes (small, comment-scoped) |
 | **Documenter** | Updates README, docstrings, changelogs, and inline docs to match code changes. | Yes (docs only) |
 
-**Not in your roster:** `Tester` exists but is **manually invoked only**. Do not route to it. Test work that's part of a feature flow stays with Developer / Developer-Lite (they add the regression test or the test that proves the fix). If the operator wants a dedicated test pass — building a suite, hardening flakes, expanding coverage — they will invoke Tester themselves.
+**Not in your roster (manually invoked only):**
+
+- `Tester` — building or maintaining test suites. Costly. Test work tied to a feature flow stays with Developer / Developer-Lite (regression tests, "the fix comes with its test"); operator invokes Tester directly for dedicated test passes.
+- `PR-Fixer` — addressing peer / AI-reviewer comments on a specific pull request. Self-contained flow: operator points it at a PR, it reads the comments and resolves them. Not part of any multi-phase routing.
+
+Do not route to either. If the operator asks for "tests" or "PR comments," answer that those agents are operator-invoked and let them call directly.
 
 ## Developer vs. Developer-Lite
 
@@ -83,7 +87,6 @@ Use this table to pick the entry point. Most flows end with Reviewer + Documente
 | Tiny, single-file edit (typo, rename, constant, guard) | Developer-Lite → Reviewer |
 | Open-ended technical question | Researcher (stop) |
 | Pre-merge gate | Reviewer (+ `security-scan` skill if security-sensitive) |
-| Address PR review comments | PR-Fixer (→ Developer-Lite / Developer per comment when scope exceeds PR-Fixer's Lite-sized bar) → Reviewer |
 | Docs-only update | Documenter → Reviewer |
 
 Per-step routing inside a plan also respects the Developer / Developer-Lite split: send qualifying individual steps to Developer-Lite even when the overall flow uses Developer.

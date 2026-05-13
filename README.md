@@ -96,9 +96,9 @@ agents/                       # Specialist agents — one role per file
   Developer-Lite.agent.md     # Cheaper sibling for single-file, low-risk edits; escalates when scope grows
   Debugger.agent.md           # Reproduces defects, isolates root cause, proposes minimal fix
   Reviewer.agent.md           # QA: reviews diffs for bugs, security, performance, quality
-  PR-Fixer.agent.md           # Triages PR review comments, applies small fixes, escalates the rest
   Documenter.agent.md         # Updates README, CHANGELOG, docstrings to match code
   Tester.agent.md             # Builds and maintains test suites — MANUALLY INVOKED ONLY
+  PR-Fixer.agent.md           # Reads + addresses PR review comments — MANUALLY INVOKED ONLY
 
 skills/                       # Reusable knowledge agents reference by path
   token-discipline/SKILL.md   # Mandatory for every agent: token budget rules + operator check-in protocol
@@ -128,10 +128,12 @@ The Orchestrator is the master agent. It classifies the incoming request and rou
 | Tiny, single-file edit (typo, rename, constant, guard) | Developer-Lite → Reviewer |
 | Open-ended technical question | Researcher (stop) |
 | Pre-merge gate | Reviewer (+ `security-scan` skill if security-sensitive) |
-| Address PR review comments | PR-Fixer → Reviewer (large fixes escalate to Developer mid-flow) |
 | Docs-only update | Documenter → Reviewer |
 
-The **Tester** agent is intentionally **not** in the routing matrix — it's manually invoked. Test work that belongs to a feature flow stays with Developer / Developer-Lite (regression tests, "the change comes with its test"). Invoke Tester directly when you want a dedicated test pass: building a suite for a legacy module, hardening flaky tests, expanding coverage on specific behaviors. Tester is the most expensive role in the toolbox (lots of file reads, lots of runner invocations), so the cost is gated behind explicit opt-in.
+Two agents are intentionally **outside** the Orchestrator's routing — they're manually invoked, self-contained flows the operator starts directly:
+
+- **Tester** — building or maintaining test suites. Test work tied to a feature flow stays with Developer / Developer-Lite (regression tests, "the change comes with its test"). Invoke Tester directly for dedicated test passes: building a suite for a legacy module, hardening flaky tests, expanding coverage. It's the most expensive role in the toolbox, so the cost is gated behind explicit opt-in.
+- **PR-Fixer** — addressing review comments on a specific pull request (from human peers, AI code reviewers, or both). Point it at a PR; it reads each comment, triages it, applies the fix, and replies. No chaining to other agents — the PR-review loop is its own bounded interaction and is kept separate from the build-and-ship loop.
 
 The full routing matrix and execution model live in `agents/Orchestrator.agent.md`.
 
@@ -171,6 +173,7 @@ You don't have to enter through the Orchestrator. For a focused task, invoke a s
 - *"Use the Researcher to compare options for X."*
 - *"Have the Debugger diagnose this stack trace."*
 - *"Use the Tester to add coverage to `src/auth/session.ts`."* (Tester is **only** invoked this way.)
+- *"Point PR-Fixer at PR #42 — address the open review comments."* (PR-Fixer is **only** invoked this way.)
 
 The Orchestrator is the right entry point when a request spans multiple specialists or when the right flow isn't obvious.
 

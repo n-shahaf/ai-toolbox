@@ -25,6 +25,7 @@ Every review comment falls into exactly one of these classes. Apply them mechani
 | **DONE-ALREADY** | The comment is based on an older revision; current code already addresses it. | Reply pointing to the commit or `<file>:<line>` that addresses it. | Yes. |
 | **DUPLICATE** | Same point as another comment you're already handling. | Reply with a link to the canonical thread. | Yes. |
 | **NIT** | Stylistic preference, no real impact. | Fix if trivial; defer or push back if it would expand scope. | After fix lands (or per DEFER/PUSH-BACK). |
+| **OPERATOR-DECISION** | In scope, but the right answer isn't yours (redesign request, contested architecture, conflicting reviewers). | Pause; surface to the operator before posting anything. | No — operator decides. |
 
 ## Triage rubric — when is a comment FIX vs DEFER vs PUSH-BACK?
 
@@ -39,9 +40,9 @@ Ask in this order:
 3. **Does the fix conflict with a deliberate design choice in this PR?**
    - Yes → reply explaining the choice; if the reviewer still disagrees, escalate to the operator.
    - No → continue.
-4. **Is the fix small** (single file, prescriptive, no design call)?
-   - Yes → **FIX** — PR-Fixer applies it.
-   - No → **FIX, but escalate** to Developer / Developer-Lite via the Orchestrator. PR-Fixer does not own large refactors.
+4. **Does fixing it stay within the PR's scope?**
+   - Yes (even if multi-file) → **FIX** — apply it. PR-Fixer is a self-contained flow; size of the fix doesn't matter as long as it's in scope.
+   - No (asks for a redesign, restructure, or new requirement) → **OPERATOR-DECISION**. Surface to the operator; don't post and don't fix until they decide.
 5. **Does the fix have correctness or security stakes?**
    - Yes → reclassify as **BLOCKER**.
 
@@ -57,9 +58,6 @@ Reviewers want signal, not an essay. Concrete and short beats polite and long.
 
 **FIX / BLOCKER (fix applied):**
 > Fixed in `<sha>`. Now `<one-line description of what changed>`.
-
-**FIX (escalated):**
-> Acknowledged — this is larger than a comment-scope edit. Routing to Developer; will update when the change lands.
 
 **DEFER:**
 > Good point, but out of scope for this PR (`<what this PR claims to do>`). Filed `<issue link>` to track.
@@ -81,6 +79,9 @@ Reviewers want signal, not an essay. Concrete and short beats polite and long.
 
 **NIT (defer / push back):**
 > Leaving as-is to keep this PR scoped to `<purpose>` — happy to revisit in a follow-up.
+
+**OPERATOR-DECISION:**
+> *(No GitHub reply yet — the operator drafts the response after deciding.)*
 
 ### What replies must NOT do
 
@@ -118,17 +119,13 @@ Pause and ask the operator (don't reply on GitHub yet) when:
 - **The comment alleges a security issue** you can't immediately confirm or refute. Confirm with the operator before replying.
 - **More than ~5 comments in the same area** point at a structural problem. The right move may be to redesign, which is not a PR-Fixer call.
 
-## When to escalate to Developer (via Orchestrator)
+## Why there's no "escalate to another agent" path
 
-PR-Fixer applies Lite-sized fixes. Escalate when a comment requires:
+PR-Fixer is a **self-contained** flow. There is no chaining to Developer, Debugger, or any other agent. The operator points the agent at a PR; the agent reads, fixes, and replies; it reports back. That's the whole loop.
 
-- Multi-file changes.
-- A design decision (choice between patterns, new abstraction, restructure).
-- Anything touching auth, secrets, crypto, SQL, shell exec.
-- A change whose final form isn't clear until you've read several more files.
-- A fix to a bug the comment **alleges** but doesn't isolate — that's Debugger first, then Developer.
+The reason: PR-comment work is qualitatively different from feature-development work. It's a bounded interaction with named reviewers about a specific diff. Routing parts of it to other agents fragments the conversation and produces partial responses that confuse reviewers.
 
-The escalation goes to the **operator**, not directly across to Developer — PR-Fixer's job is to surface the right routing, not to spawn agents.
+When a comment exceeds what a comment-resolution pass can do (a redesign request, a contested architectural choice, a "this whole approach is wrong"), the right move is **OPERATOR-DECISION**: surface the situation, let the operator decide whether to restructure the PR, defer with an issue, push back, or close-and-redo. The operator may then start a separate flow (Researcher → Planner → Developer, say) — but PR-Fixer doesn't try to initiate that.
 
 ## Commit hygiene
 
