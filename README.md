@@ -4,7 +4,13 @@ A reusable set of agents and skills for an LLM-driven dev workflow. Designed for
 
 ## Install
 
-The CLI runs directly from this GitHub repo — no npm publish required. `npx` clones the repo on first use and caches it for subsequent runs.
+**Note:** this package is not published to the npm registry. Install it directly from this GitHub repository using any of the options below.
+
+Prerequisites: **Node ≥ 18** and **git** on `PATH`.
+
+### Option 1 — npx (recommended)
+
+No install step. `npx` clones the repo into its cache on first use and reuses it after.
 
 ```bash
 # install all agents + skills into the current project
@@ -19,16 +25,69 @@ npx github:n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Develo
 npx github:n-shahaf/ai-toolbox list
 ```
 
-Pin to a branch or tag to lock the version you install:
+### Option 2 — install globally from git
+
+For a stable `ai-toolbox` command on your `PATH`:
+
+```bash
+npm install -g github:n-shahaf/ai-toolbox
+
+ai-toolbox list
+ai-toolbox init --target claude
+ai-toolbox sync --write
+```
+
+Uninstall with `npm uninstall -g @n-shahaf/ai-toolbox`.
+
+### Option 3 — clone the repo and run
+
+For working on the CLI itself, or inspecting the agent/skill files locally:
+
+```bash
+git clone https://github.com/n-shahaf/ai-toolbox.git
+cd ai-toolbox
+node bin/ai-toolbox.js list
+node bin/ai-toolbox.js init --dir ~/path/to/your-project --target claude
+```
+
+### Option 4 — manual copy (no CLI)
+
+If you don't want any tooling, copy the files by hand. You lose the lockfile-based `sync`, but the agent and skill markdown files themselves work the same way.
+
+```bash
+git clone --depth 1 https://github.com/n-shahaf/ai-toolbox.git /tmp/ai-toolbox
+mkdir -p my-project/.claude
+cp -r /tmp/ai-toolbox/agents  my-project/.claude/
+cp -r /tmp/ai-toolbox/skills  my-project/.claude/
+```
+
+To stay in sync later, re-run the same commands or fold the repo in as a git submodule.
+
+### Pinning to a version
+
+Append `#branch`, `#tag`, or `#<sha>` to the git URL to lock the version you install:
 
 ```bash
 npx github:n-shahaf/ai-toolbox#main init --target claude
-npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude   # if a release is tagged
+npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude     # if a release is tagged
+npm install -g github:n-shahaf/ai-toolbox#main
 ```
 
-`init` writes a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` can tell what changed where.
+### What `init` writes
 
-If `npx` keeps an old cached copy, force a re-clone with `npx -y github:n-shahaf/ai-toolbox ...` or clear the cache: `npm cache clean --force`.
+Every install method (1–3) writes a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` can tell what changed where.
+
+### Troubleshooting
+
+```bash
+# force npx to re-fetch the repo (bypass the cache)
+npx -y github:n-shahaf/ai-toolbox ...
+
+# nuclear option: clear the npx cache entirely
+npm cache clean --force
+```
+
+If `git` isn't on `PATH`, `npm` and `npx` will fail to clone the repo. Install git first.
 
 ## Update
 
