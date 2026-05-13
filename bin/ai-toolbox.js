@@ -16,7 +16,7 @@ Commands:
   help                       Show this help
 
 Common options:
-  --target <name>            claude | copilot | generic   (default: claude)
+  --target <name>            claude | copilot | cursor | generic   (default: claude)
   --dir <path>               Working directory             (default: cwd)
   --agents <a,b,c>           Comma-separated subset; defaults to all
   --skills <a,b,c>           Comma-separated subset; defaults to all
@@ -34,6 +34,7 @@ Examples:
   npx @n-shahaf/ai-toolbox list
   npx @n-shahaf/ai-toolbox init --target claude
   npx @n-shahaf/ai-toolbox init --target copilot --agents Orchestrator,Developer
+  npx @n-shahaf/ai-toolbox init --target cursor
   npx @n-shahaf/ai-toolbox sync --write
   npx @n-shahaf/ai-toolbox sync --remote --write --force
 `;
