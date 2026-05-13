@@ -2,6 +2,86 @@
 
 A reusable set of agents and skills for an LLM-driven dev workflow. Designed for GitHub Copilot, but the agent and skill files are plain Markdown with YAML frontmatter and can be loaded by any tool that understands that format.
 
+## Install
+
+This package is not published to npm — it lives only in this GitHub repo. Use `npx` with the `github:` shortcut to run the CLI directly from the repo:
+
+```bash
+# install all agents + skills into the current project
+npx github:n-shahaf/ai-toolbox init --target claude     # → .claude/agents and .claude/skills
+npx github:n-shahaf/ai-toolbox init --target copilot    # → .github/chatmodes and .github/copilot-skills
+npx github:n-shahaf/ai-toolbox init --target generic    # → .ai-toolbox/agents and .ai-toolbox/skills
+
+# pick a subset
+npx github:n-shahaf/ai-toolbox init --target claude --agents Orchestrator,Developer --skills token-discipline
+
+# see what's available
+npx github:n-shahaf/ai-toolbox list
+```
+
+`npx` clones the repo into its cache the first time you run it and reuses that clone on subsequent calls. No local install step, no npm registry.
+
+**Prerequisites:** Node ≥ 18 and `git` on `PATH` (npm uses `git` under the hood to fetch from `github:` URLs).
+
+**Pin a version** by appending `#branch`, `#tag`, or `#<sha>` to the URL:
+
+```bash
+npx github:n-shahaf/ai-toolbox#main init --target claude
+npx github:n-shahaf/ai-toolbox#v0.1.0 init --target claude   # if a release is tagged
+```
+
+**`init` writes** a `.ai-toolbox.lock.json` in your project recording which files were installed and their content hash. Commit it so the next `sync` knows what changed where.
+
+**Troubleshooting:** if `npx` keeps an old cached copy after you push an update, force a re-fetch with `npx -y github:n-shahaf/ai-toolbox ...`, or clear the npx cache entirely with `npm cache clean --force`.
+
+<details>
+<summary>Alternatives if you don't want npx</summary>
+
+```bash
+# Global install (stable `ai-toolbox` command on PATH)
+npm install -g github:n-shahaf/ai-toolbox
+ai-toolbox list
+
+# Clone and run (for developing on the CLI itself)
+git clone https://github.com/n-shahaf/ai-toolbox.git
+node ai-toolbox/bin/ai-toolbox.js init --dir ~/my-project --target claude
+
+# Pure copy (no CLI, no lockfile-based sync)
+git clone --depth 1 https://github.com/n-shahaf/ai-toolbox.git /tmp/ai-toolbox
+cp -r /tmp/ai-toolbox/agents /tmp/ai-toolbox/skills my-project/.claude/
+```
+
+</details>
+
+## Update
+
+```bash
+# show what would change (default is dry-run)
+npx github:n-shahaf/ai-toolbox sync
+
+# apply non-conflicting updates (upstream-changed files; missing files)
+npx github:n-shahaf/ai-toolbox sync --write
+
+# pull the absolute latest from GitHub instead of the version bundled with the npx clone
+npx github:n-shahaf/ai-toolbox sync --remote --write
+
+# overwrite local customizations too (you'll lose those edits)
+npx github:n-shahaf/ai-toolbox sync --write --force
+```
+
+The lockfile lets `sync` categorize each file:
+
+| Status | Meaning | Default action |
+|---|---|---|
+| `unchanged` | source and local match | skip |
+| `new (missing)` | in manifest, not on disk | install with `--write` |
+| `upstream` | source changed, local matches the installed hash | install with `--write` |
+| `local-only` | you customized; source is the same as when you installed | leave alone (`--force` to overwrite) |
+| `conflict` | source AND local both differ from the installed hash | skip (`--force` to overwrite) |
+| `orphan` | in lockfile but no longer in upstream | informational only |
+
+This is the closest thing to "merge upstream into my version" without writing a real three-way merger — most of the time, conflicts will be rare because the toolbox files are reference material the consumer doesn't edit.
+
 ## What's inside
 
 ```
@@ -21,6 +101,11 @@ skills/                       # Reusable knowledge agents reference by path
   debugging/SKILL.md          # Reproduction, hypothesis testing, root-cause analysis
   documentation/SKILL.md      # Voice, structure, what belongs where
   security-scan/SKILL.md      # Repository-wide security scan (medium/high/critical only)
+
+bin/ai-toolbox.js             # CLI entry (npx target)
+lib/                          # CLI implementation (init / sync / list)
+scripts/build-manifest.js     # Regenerates manifest.json from frontmatter
+manifest.json                 # Generated catalog of agents and skills
 ```
 
 ## Workflow overview

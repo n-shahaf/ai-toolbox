@@ -1,0 +1,149 @@
+{
+  "version": "0.1.0",
+  "generatedAt": "2026-05-13T20:00:30.565Z",
+  "agents": [
+    {
+      "name": "Debugger",
+      "file": "agents/Debugger.agent.md",
+      "description": "Reproduces defects, isolates root cause, and proposes a minimal fix. Diagnoses — does not implement. Hands the proposed fix to the Developer.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "execute",
+        "read",
+        "search",
+        "web",
+        "agent",
+        "todo"
+      ]
+    },
+    {
+      "name": "Developer-Lite",
+      "file": "agents/Developer-Lite.agent.md",
+      "description": "Cheaper Developer for small, well-scoped, low-risk edits. Single-file changes, typos, renames, simple test additions, mechanical refactors, and copy-paste-shaped tasks. Escalates to Developer when scope or risk exceeds limits.",
+      "model": "GPT-5 mini (copilot)",
+      "tools": [
+        "vscode",
+        "execute",
+        "read",
+        "edit",
+        "search",
+        "agent",
+        "todo"
+      ]
+    },
+    {
+      "name": "Developer",
+      "file": "agents/Developer.agent.md",
+      "description": "Senior implementer for non-trivial work. Multi-file changes, new modules, cross-cutting refactors, anything touching public APIs or security-sensitive surfaces. For simple single-file edits use Developer-Lite.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "execute",
+        "read",
+        "edit",
+        "search",
+        "web",
+        "agent",
+        "github/*",
+        "todo"
+      ]
+    },
+    {
+      "name": "Documenter",
+      "file": "agents/Documenter.agent.md",
+      "description": "Updates README, changelogs, docstrings, and inline docs so they stay accurate after code changes. Writes documentation only — never functional code.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "read",
+        "edit",
+        "search",
+        "web",
+        "agent",
+        "github/*",
+        "todo"
+      ]
+    },
+    {
+      "name": "Orchestrator",
+      "file": "agents/Orchestrator.agent.md",
+      "description": "Master agent that decomposes user requests into tasks and delegates to specialist subagents. Coordinates work across the team but never implements anything itself.",
+      "model": "Claude Sonnet 4.6 (copilot)",
+      "tools": [
+        "read",
+        "search",
+        "agent",
+        "todo"
+      ]
+    },
+    {
+      "name": "Planner",
+      "file": "agents/Planner.agent.md",
+      "description": "Produces a file-scoped, ordered implementation plan for a given goal. Reads the codebase, verifies docs, surfaces edge cases, and outputs WHAT to do — never HOW to code it.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "read",
+        "search",
+        "web",
+        "agent",
+        "todo"
+      ]
+    },
+    {
+      "name": "Researcher",
+      "file": "agents/Researcher.agent.md",
+      "description": "Technical strategist and pattern finder. Surveys multiple approaches to a problem, compares trade-offs, and recommends one before any code is written.",
+      "model": "Gemini 3.1 Pro (Preview) (copilot)",
+      "tools": [
+        "vscode",
+        "read",
+        "search",
+        "web",
+        "agent",
+        "todo"
+      ]
+    },
+    {
+      "name": "Reviewer",
+      "file": "agents/Reviewer.agent.md",
+      "description": "QA specialist. Reviews code changes for bugs, security, performance, type safety, and quality before they ship. Reports findings — does not write code.",
+      "model": "GPT-5.3-Codex (copilot)",
+      "tools": [
+        "vscode",
+        "read",
+        "search",
+        "web",
+        "agent"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "code-quality",
+      "file": "skills/code-quality/SKILL.md",
+      "description": "Writing and reviewing clean, maintainable code. Covers SOLID, design patterns, code smells, and review heuristics. Reference when designing modules, implementing features, or reviewing diffs."
+    },
+    {
+      "name": "debugging",
+      "file": "skills/debugging/SKILL.md",
+      "description": "Systematic defect diagnosis — reproduction, hypothesis testing, bisection, root cause analysis, and postmortems. Reference when isolating a bug, validating a fix's coverage, or writing a regression test."
+    },
+    {
+      "name": "documentation",
+      "file": "skills/documentation/SKILL.md",
+      "description": "Writing and updating project documentation — README, CHANGELOG, docstrings, API reference. Covers voice, structure, what belongs where, and when to write nothing. Used primarily by the Documenter agent."
+    },
+    {
+      "name": "security-scan",
+      "file": "skills/security-scan/SKILL.md",
+      "description": "Perform a repository-wide security scan (codebase scan, not PR diff) and report only medium/high/critical vulnerabilities with concrete exploit paths and code evidence. Use when the user asks for a security review, security audit, threat review, SAST-style scan, or types the /security-scan command."
+    },
+    {
+      "name": "token-discipline",
+      "file": "skills/token-discipline/SKILL.md",
+      "description": "Mandatory operating rules for every agent — minimize unnecessary tokens, refuse exploration, and loop in the human operator before any costly operation that the operator could do faster or already knows the answer to. Reference at the start of every task."
+    }
+  ]
+}
